@@ -2,6 +2,10 @@ const router = require("express").Router();
 const Products = require("../models/product_model");
 const { param, body, validationResult } = require("express-validator");
 const StatusCode = require("../helper/status_code_helper");
+const { fileUpload, filedelete } = require("../helper/firebase_upload_helper");
+const multer = require("multer");
+const storage = multer.memoryStorage();
+const upload = multer({ storage: storage });
 
 router.post(
   "/productCreate",
@@ -205,6 +209,7 @@ router.post(
         color,
         price
       );
+
       res.json(result);
     } catch (error) {
       res.status(error);
@@ -478,6 +483,219 @@ router.post(
       console.log({ item, page });
       const result = await Products.productItemSearch(item, page);
       res.json(result);
+    } catch (error) {
+      res.status(error);
+    }
+  }
+);
+
+router.post(
+  "/productCreatePic",
+  upload.fields([
+    { name: "pic_1" },
+    { name: "pic_2" },
+    { name: "pic_3" },
+    { name: "pic_4" },
+  ]),
+  [
+    // Custom validator for pic_1
+    body("pic_1").custom((value, { req }) => {
+      if (!req.files || !req.files.pic_1) {
+        throw new Error("File pic_1 is required");
+      }
+      if (!req.files.pic_1[0].mimetype.startsWith("image")) {
+        throw new Error("Uploaded file pic_1 must be an image");
+      }
+      return true;
+    }),
+    body("pic_2").custom((value, { req }) => {
+      if (!req.files || !req.files.pic_2) {
+        throw new Error("File pic_2 is required");
+      }
+      if (!req.files.pic_2[0].mimetype.startsWith("image")) {
+        throw new Error("Uploaded file pic_2 must be an image");
+      }
+      return true;
+    }),
+    body("pic_3").custom((value, { req }) => {
+      if (!req.files || !req.files.pic_2) {
+        throw new Error("File pic_3 is required");
+      }
+      if (!req.files.pic_2[0].mimetype.startsWith("image")) {
+        throw new Error("Uploaded file pic_3 must be an image");
+      }
+      return true;
+    }),
+    body("pic_4").custom((value, { req }) => {
+      if (!req.files || !req.files.pic_2) {
+        throw new Error("File pic_4 is required");
+      }
+      if (!req.files.pic_2[0].mimetype.startsWith("image")) {
+        throw new Error("Uploaded file pic_4 must be an image");
+      }
+      return true;
+    }),
+  ],
+  async (req, res) => {
+    try {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        return res.json(new StatusCode.INVALID_ARGUMENT(errors.errors[0].msg));
+      }
+
+      const {
+        item,
+        model,
+        cpu,
+        ram,
+        storage,
+        graphics,
+        battery,
+        screen_size,
+        color,
+        price,
+      } = req.body;
+      const { pic_1, pic_2, pic_3, pic_4 } = req.files;
+      // Upload each file and get the URLs
+      const uploadedFiles = await Promise.all([
+        fileUpload(pic_1[0]),
+        fileUpload(pic_2[0]),
+        fileUpload(pic_3[0]),
+        fileUpload(pic_4[0]),
+      ]);
+      // Check if all uploads were successful
+      const allUploadedSuccessfully = uploadedFiles.every(
+        (file) => file.code === "200"
+      );
+      console.log(allUploadedSuccessfully);
+      if (allUploadedSuccessfully) {
+        const result = await Products.productCreate(
+          uploadedFiles[0].data,
+          uploadedFiles[1].data,
+          uploadedFiles[2].data,
+          uploadedFiles[3].data,
+          item,
+          model,
+          cpu,
+          ram,
+          storage,
+          graphics,
+          battery,
+          screen_size,
+          color,
+          price
+        );
+        res.json(result);
+      }
+      res.json(uploadedFiles);
+    } catch (error) {
+      res.status(error);
+    }
+  }
+);
+
+router.put(
+  "/productUpdatePic/:id",
+  upload.fields([
+    { name: "pic_1" },
+    { name: "pic_2" },
+    { name: "pic_3" },
+    { name: "pic_4" },
+  ]),
+  [
+    // Custom validator for pic_1
+    body("pic_1").custom((value, { req }) => {
+      if (!req.files || !req.files.pic_1) {
+        throw new Error("File pic_1 is required");
+      }
+      if (!req.files.pic_1[0].mimetype.startsWith("image")) {
+        throw new Error("Uploaded file pic_1 must be an image");
+      }
+      return true;
+    }),
+    body("pic_2").custom((value, { req }) => {
+      if (!req.files || !req.files.pic_2) {
+        throw new Error("File pic_2 is required");
+      }
+      if (!req.files.pic_2[0].mimetype.startsWith("image")) {
+        throw new Error("Uploaded file pic_2 must be an image");
+      }
+      return true;
+    }),
+    body("pic_3").custom((value, { req }) => {
+      if (!req.files || !req.files.pic_2) {
+        throw new Error("File pic_3 is required");
+      }
+      if (!req.files.pic_2[0].mimetype.startsWith("image")) {
+        throw new Error("Uploaded file pic_3 must be an image");
+      }
+      return true;
+    }),
+    body("pic_4").custom((value, { req }) => {
+      if (!req.files || !req.files.pic_2) {
+        throw new Error("File pic_4 is required");
+      }
+      if (!req.files.pic_2[0].mimetype.startsWith("image")) {
+        throw new Error("Uploaded file pic_4 must be an image");
+      }
+      return true;
+    }),
+    param("id").notEmpty().isInt().toInt(),
+  ],
+  async (req, res) => {
+    try {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        return res.json(new StatusCode.INVALID_ARGUMENT(errors.errors[0].msg));
+      }
+
+      const {
+        item,
+        model,
+        cpu,
+        ram,
+        storage,
+        graphics,
+        battery,
+        screen_size,
+        color,
+        price,
+      } = req.body;
+      const id = req.params.id;
+      const { pic_1, pic_2, pic_3, pic_4 } = req.files;
+      // Upload each file and get the URLs
+      const uploadedFiles = await Promise.all([
+        fileUpload(pic_1[0]),
+        fileUpload(pic_2[0]),
+        fileUpload(pic_3[0]),
+        fileUpload(pic_4[0]),
+      ]);
+      // Check if all uploads were successful
+      const allUploadedSuccessfully = uploadedFiles.every(
+        (file) => file.code === "200"
+      );
+      console.log(allUploadedSuccessfully);
+      if (allUploadedSuccessfully) {
+        const result = await Products.productUpdate(
+          uploadedFiles[0].data,
+          uploadedFiles[1].data,
+          uploadedFiles[2].data,
+          uploadedFiles[3].data,
+          item,
+          model,
+          cpu,
+          ram,
+          storage,
+          graphics,
+          battery,
+          screen_size,
+          color,
+          price,
+          id
+        );
+        res.json(result);
+      }
+      res.json(uploadedFiles);
     } catch (error) {
       res.status(error);
     }

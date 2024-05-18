@@ -67,6 +67,7 @@ const productUpdate = async (
   pic_2,
   pic_3,
   pic_4,
+  item,
   model,
   cpu,
   ram,
@@ -78,13 +79,31 @@ const productUpdate = async (
   price,
   id
 ) => {
+  console.log({
+    pic_1,
+    pic_2,
+    pic_3,
+    pic_4,
+    item,
+    model,
+    cpu,
+    ram,
+    storage,
+    graphics,
+    battery,
+    screen_size,
+    color,
+    price,
+    id,
+  });
   try {
-    const sql = `UPDATE products SET pic_1=?, pic_2=?, pic_3=?, pic_4=?, model=?, cpu=?, ram=?, storage=?, graphics=?, battery=?, screen_size=?, color=?, price=? WHERE id=?`;
+    const sql = `UPDATE products SET pic_1=?, pic_2=?, pic_3=?, pic_4=?, item=?, model=?, cpu=?, ram=?, storage=?, graphics=?, battery=?, screen_size=?, color=?, price=? WHERE id=?`;
     const result = await DB.query(sql, [
       pic_1,
       pic_2,
       pic_3,
       pic_4,
+      item,
       model,
       cpu,
       ram,
@@ -96,7 +115,7 @@ const productUpdate = async (
       price,
       id,
     ]);
-    return new StatusCode.OK(null, "Products Data is updated");
+    return new StatusCode.OK(result, "Products Data is updated");
   } catch (error) {
     console.log(error);
     return new StatusCode.UNKNOWN(error.message);
