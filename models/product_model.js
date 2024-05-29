@@ -125,8 +125,23 @@ const productUpdate = async (
 const productDelete = async (id) => {
   try {
     const sql = `DELETE FROM products WHERE id=?`;
-    await DB.query(sql, [id]);
-    return new StatusCode.OK(null, `${id} id deleted.`);
+    const result = await DB.query(sql, [id]);
+    return new StatusCode.OK(result, `${id} id deleted.`);
+  } catch (error) {
+    return new StatusCode.UNKNOWN(error.message);
+  }
+};
+
+const productIdSearch = async (id) => {
+  try {
+    const sql = `SELECT * FROM products WHERE id=?`;
+    const result = await DB.query(sql, [id]);
+    console.log(result);
+    if (result.length > 0) {
+      return new StatusCode.OK(result[0]);
+    } else {
+      return new StatusCode.NOT_FOUND();
+    }
   } catch (error) {
     return new StatusCode.UNKNOWN(error.message);
   }
@@ -157,5 +172,6 @@ module.exports = {
   productList,
   productUpdate,
   productDelete,
+  productIdSearch,
   productItemSearch,
 };

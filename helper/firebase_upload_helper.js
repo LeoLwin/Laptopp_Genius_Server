@@ -38,7 +38,7 @@ const filedelete = async (fileUrl) => {
     // Delete the file
     await fileRef.delete();
     return new StatusCode.OK("File is Deleted");
-  } catch (error) {
+  } catch (error) { 
     console.log(error);
     return new StatusCode.UNKNOWN(error.message);
   }
