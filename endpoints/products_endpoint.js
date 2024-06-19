@@ -706,7 +706,7 @@ router.post(
         color,
         price,
       });
-      console.log({ pic_1, pic_2, pic_3, pic_4 });
+      console.log(req.file);
       // Upload each file and get the URLs
       const uploadedFiles = await Promise.all([
         fileUpload(pic_1[0], item, model),
@@ -757,54 +757,59 @@ router.put(
     { name: "pic_4" },
   ]),
   [
-    // Custom validator for pic_1
     body("pic_1").custom((value, { req }) => {
-      if (!req.file.pic_1 && !req.body.pic_1) {
+      if (!req.files["pic_1"] && !req.body.pic_1) {
         throw new Error(
-          " pic_1 Either image file or image URL must be provided"
+          "Pic_1: Either image file or image URL must be provided"
         );
       }
-      if (req.file && !req.file.mimetype.startsWith("image")) {
-        throw new Error("Uploaded file must be an image");
+      if (
+        req.files["pic_1"] &&
+        !req.files["pic_1"][0].mimetype.startsWith("image")
+      ) {
+        throw new Error("Pic_1: Uploaded file must be an image");
       }
-      // if (
-      //   req.body.image &&
-      //   !/^http?:\/\/.+\.(jpg|jpeg|png|gif)$/.test(req.body.image)
-      // ) {
-      //   throw new Error("Invalid image URL");
-      // }
       return true;
     }),
     body("pic_2").custom((value, { req }) => {
-      if (!req.file && !req.body.pic_2) {
+      if (!req.files["pic_2"] && !req.body.pic_2) {
         throw new Error(
-          "pic_1 Either image file or image URL must be provided"
+          "Pic_2: Either image file or image URL must be provided"
         );
       }
-      if (req.file && !req.file.mimetype.startsWith("image")) {
-        throw new Error("Uploaded file must be an image");
+      if (
+        req.files["pic_2"] &&
+        !req.files["pic_2"][0].mimetype.startsWith("image")
+      ) {
+        throw new Error("Pic_2: Uploaded file must be an image");
       }
       return true;
     }),
     body("pic_3").custom((value, { req }) => {
-      if (!req.file && !req.body.pic_3) {
+      if (!req.files["pic_3"] && !req.body.pic_3) {
         throw new Error(
-          "pic_1 Either image file or image URL must be provided"
+          "Pic_3: Either image file or image URL must be provided"
         );
       }
-      if (req.file && !req.file.mimetype.startsWith("image")) {
-        throw new Error("Uploaded file must be an image");
+      if (
+        req.files["pic_3"] &&
+        !req.files["pic_3"][0].mimetype.startsWith("image")
+      ) {
+        throw new Error("Pic_3: Uploaded file must be an image");
       }
       return true;
     }),
     body("pic_4").custom((value, { req }) => {
-      if (!req.file && !req.body.pic_4) {
+      if (!req.files["pic_4"] && !req.body.pic_4) {
         throw new Error(
-          "pic_1 Either image file or image URL must be provided"
+          "Pic_4: Either image file or image URL must be provided"
         );
       }
-      if (req.file && !req.file.mimetype.startsWith("image")) {
-        throw new Error("Uploaded file must be an image");
+      if (
+        req.files["pic_4"] &&
+        !req.files["pic_4"][0].mimetype.startsWith("image")
+      ) {
+        throw new Error("Pic_4: Uploaded file must be an image");
       }
       return true;
     }),
@@ -952,73 +957,24 @@ router.put(
   ],
   async (req, res) => {
     try {
+      
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
         return res.json(new StatusCode.INVALID_ARGUMENT(errors.errors[0].msg));
       }
 
-      const {
-        pic_1: pic_1_url,
-        pic_2: pic_2_url,
-        pic_3: pic_3_url,
-        pic_3: pic_4_url,
-        item,
-        model,
-        cpu,
-        ram,
-        storage,
-        graphics,
-        battery,
-        screen_size,
-        color,
-        price,
-      } = req.body;
-      const id = req.params.id;
-      let pic_1;
-      let pic_2;
-      let pic_3;
-      let pic_4;
-
-      if (req.file) {
-        pic_1 = req.file.pic_1;
-        pic_2 = req.file.pic_2;
-        pic_3 = req.file.pic_3;
-        pic_4 = req.file.pic_4;
-        console.log({
-          item,
-          model,
-          cpu,
-          ram,
-          storage,
-          graphics,
-          battery,
-          screen_size,
-          color,
-          price,
-          id,
-        });
-        console.log({ pic_1, pic_2, pic_3, pic_4 });
-      } else if ((pic_1_url, pic_2_url, pic_3_url, pic_4_url)) {
-        pic_1 = pic_1_url;
-        pic_2 = pic_2_url;
-        pic_3 = pic_3_url;
-        pic_4 = pic_4_url;
-        console.log({
-          item,
-          model,
-          cpu,
-          ram,
-          storage,
-          graphics,
-          battery,
-          screen_size,
-          color,
-          price,
-          id,
-        });
-        console.log({ pic_1, pic_2, pic_3, pic_4 });
+      // Logging the uploaded files and request body
+      // console.log("Uploaded files:", req.files);
+      // console.log("Request body:", req.body);
+      console.log(Object.keys(req.files).length)
+      
+      if (!Object.keys(req.files).length) {
+        console.log("No files were uploaded.");
       }
 
+      res.status(200).json({ message: "Product updated successfully" });
+
+      
       // Upload each file and get the URLs
       // const uploadedFiles = await Promise.all([
       //   fileUpload(pic_1[0], item, model),
